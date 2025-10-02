@@ -36,7 +36,7 @@ screen.half.h = screen.h / 2;
 screen.x = Window.GetX();
 screen.y = Window.GetY();
 
-NUM = 1; // 静态图片，帧数设置为 1
+NUM = 1;
 SPEED = 2;
 FAKE_OFFSET = 0.05; // If your linux boot too fast to play the animation, increase this value.
 FONTSIZE = Math.Int(screen.w * 0.02);
@@ -44,11 +44,10 @@ FONT = "unifont"; // This cannot work.
 
 // --------------------------------- Init --------------------------
 
-// 背景颜色（红色）
+
 Window.SetBackgroundTopColor(0.8705882352941177, 0.10588235294117647, 0.23921568627450981);
 Window.SetBackgroundBottomColor(0.8705882352941177, 0.10588235294117647, 0.23921568627450981);
 
-// 加载静态 Logo 图片
 logo.images[0] = Image("static_logo.png").Scale(screen.w * 0.663, screen.w * 0.159);
 
 // --------------------------------- Logo --------------------------
@@ -61,7 +60,7 @@ logo.sprite.SetY(screen.y + screen.half.h - logo.images[0].GetHeight() / 2);
 
 fun update_logo()
 {
-    // 静态 Logo 只需要在第一次刷新时设置图片并标记完成
+
     if (!logo.is_done)
     {
         logo.sprite.SetImage(logo.images[0]);
@@ -84,7 +83,7 @@ progress.bar.SetY(progress.box.GetY() + progress.box_image.GetHeight() / 2 - pro
 progress.bar.SetZ(2);
 progress.opacity = 0;
 
-// 在 boot 模式下，进度条初始设为完全透明 (Opacity=0)
+
 if (Plymouth.GetMode() == "boot")
 {
     progress.box.SetOpacity(progress.opacity);
@@ -101,7 +100,7 @@ fun set_progress(precent)
         {
             precent = 1;
             progress.is_finished = 1;
-            progress.fade_mode = 1; // 完成后淡出
+            progress.fade_mode = 1;
         }
         progress.bar.SetImage(progress.bar_image.Scale(progress.box_image.GetWidth() * 0.983 * precent, progress.box_image.GetHeight() * 0.6));
     }
@@ -109,7 +108,7 @@ fun set_progress(precent)
 
 fun update_progress_opacity()
 {
-    if(progress.fade_mode == 1) // 淡出 (Fade Out)
+    if(progress.fade_mode == 1)
     {
         progress.fade_mode_setted = 1;
         progress.opacity -= 0.03;
@@ -122,7 +121,7 @@ fun update_progress_opacity()
         progress.bar.SetOpacity(progress.opacity);
 
     }
-    else if(progress.fade_mode == 2) // 淡入 (Fade In)
+    else if(progress.fade_mode == 2)
     {
         progress.opacity += 0.03;
         if(progress.opacity >= 1)
@@ -141,9 +140,7 @@ fun on_refresh()
 {
     update_logo();
 
-    // *** 修复后的逻辑 ***
-    // 当 Logo 完成显示，且进度条完全透明时 (progress.opacity == 0)，开始淡入 (progress.fade_mode = 2)。
-    // 确保 progress.fade_mode_setted == 0 避免在进度条完全淡出后又自动淡入。
+
     if (logo.is_done && progress.opacity == 0 && progress.fade_mode_setted == 0 && Plymouth.GetMode() == "boot")
     {
         progress.fade_mode = 2;
