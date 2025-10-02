@@ -1,0 +1,11 @@
+[Plymouth Theme]
+Name=acceed
+Description=Bugjump animation.
+Comment=This theme is a modification of the default theme, using a acceed animation.
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/acceed
+ScriptFile=/usr/share/plymouth/themes/acceed/acceed.script
+
+#acceed
