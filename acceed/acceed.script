@@ -1,32 +1,32 @@
 /*
-    Author : ChenPi11
-    Mail : wushengwuxi-msctinoulk@outlook.com
-    Github : @ChenPi11
-This is free and unencumbered software released into the public domain.
-
-Anyone is free to copy, modify, publish, use, compile, sell, or
-distribute this software, either in source code form or as a compiled
-binary, for any purpose, commercial or non-commercial, and by any
-means.
-
-In jurisdictions that recognize copyright laws, the author or authors
-of this software dedicate any and all copyright interest in the
-software to the public domain. We make this dedication for the benefit
-of the public at large and to the detriment of our heirs and
-successors. We intend this dedication to be an overt act of
-relinquishment in perpetuity of all present and future rights to this
-software under copyright law.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
-
-For more information, please refer to <https://unlicense.org>
-*/
+ *    Author : ChenPi11
+ *    Mail : wushengwuxi-msctinoulk@outlook.com
+ *    Github : @ChenPi11
+ * This is free and unencumbered software released into the public domain.
+ *
+ * Anyone is free to copy, modify, publish, use, compile, sell, or
+ * distribute this software, either in source code form or as a compiled
+ * binary, for any purpose, commercial or non-commercial, and by any
+ * means.
+ *
+ * In jurisdictions that recognize copyright laws, the author or authors
+ * of this software dedicate any and all copyright interest in the
+ * software to the public domain. We make this dedication for the benefit
+ * of the public at large and to the detriment of our heirs and
+ * successors. We intend this dedication to be an overt act of
+ * relinquishment in perpetuity of all present and future rights to this
+ * software under copyright law.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information, please refer to <https://unlicense.org>
+ */
 
 // Screen size.
 screen.w = Window.GetWidth(0);
@@ -36,7 +36,7 @@ screen.half.h = screen.h / 2;
 screen.x = Window.GetX();
 screen.y = Window.GetY();
 
-NUM = 81;
+NUM = 1; // 静态图片，帧数设置为 1
 SPEED = 2;
 FAKE_OFFSET = 0.05; // If your linux boot too fast to play the animation, increase this value.
 FONTSIZE = Math.Int(screen.w * 0.02);
@@ -44,11 +44,11 @@ FONT = "unifont"; // This cannot work.
 
 // --------------------------------- Init --------------------------
 
+// 背景颜色（红色）
 Window.SetBackgroundTopColor(0.8705882352941177, 0.10588235294117647, 0.23921568627450981);
 Window.SetBackgroundBottomColor(0.8705882352941177, 0.10588235294117647, 0.23921568627450981);
 
-NUM = 1;
-
+// 加载静态 Logo 图片
 logo.images[0] = Image("static_logo.png").Scale(screen.w * 0.663, screen.w * 0.159);
 
 // --------------------------------- Logo --------------------------
@@ -61,6 +61,7 @@ logo.sprite.SetY(screen.y + screen.half.h - logo.images[0].GetHeight() / 2);
 
 fun update_logo()
 {
+    // 静态 Logo 只需要在第一次刷新时设置图片并标记完成
     if (!logo.is_done)
     {
         logo.sprite.SetImage(logo.images[0]);
@@ -82,6 +83,8 @@ progress.bar.SetX(screen.w * 0.5 - progress.bar_image.GetWidth() / 2);
 progress.bar.SetY(progress.box.GetY() + progress.box_image.GetHeight() / 2 - progress.bar_image.GetHeight() / 2);
 progress.bar.SetZ(2);
 progress.opacity = 0;
+
+// 在 boot 模式下，进度条初始设为完全透明 (Opacity=0)
 if (Plymouth.GetMode() == "boot")
 {
     progress.box.SetOpacity(progress.opacity);
@@ -98,7 +101,7 @@ fun set_progress(precent)
         {
             precent = 1;
             progress.is_finished = 1;
-            progress.fade_mode = 1;
+            progress.fade_mode = 1; // 完成后淡出
         }
         progress.bar.SetImage(progress.bar_image.Scale(progress.box_image.GetWidth() * 0.983 * precent, progress.box_image.GetHeight() * 0.6));
     }
@@ -106,7 +109,7 @@ fun set_progress(precent)
 
 fun update_progress_opacity()
 {
-    if(progress.fade_mode == 1)
+    if(progress.fade_mode == 1) // 淡出 (Fade Out)
     {
         progress.fade_mode_setted = 1;
         progress.opacity -= 0.03;
@@ -117,11 +120,10 @@ fun update_progress_opacity()
         }
         progress.box.SetOpacity(progress.opacity);
         progress.bar.SetOpacity(progress.opacity);
-        
+
     }
-    else if(progress.fade_mode == 2 && logo.is_done)
+    else if(progress.fade_mode == 2) // 淡入 (Fade In)
     {
-        progress.fade_mode_setted = 1;
         progress.opacity += 0.03;
         if(progress.opacity >= 1)
         {
@@ -138,10 +140,15 @@ fun update_progress_opacity()
 fun on_refresh()
 {
     update_logo();
-    if (logo.is_done && progress.opacity != 0 && progress.fade_mode_setted == 0 && Plymouth.GetMode() == "boot")
+
+    // *** 修复后的逻辑 ***
+    // 当 Logo 完成显示，且进度条完全透明时 (progress.opacity == 0)，开始淡入 (progress.fade_mode = 2)。
+    // 确保 progress.fade_mode_setted == 0 避免在进度条完全淡出后又自动淡入。
+    if (logo.is_done && progress.opacity == 0 && progress.fade_mode_setted == 0 && Plymouth.GetMode() == "boot")
     {
         progress.fade_mode = 2;
     }
+
     update_progress_opacity();
 }
 Plymouth.SetRefreshFunction(on_refresh);
@@ -168,9 +175,9 @@ fun on_display_question(prompt, entry)
 {
     progress.fade_mode = 1;
     if (entry == "")
-	{
+    {
         entry = "<answer>";
-	}
+    }
 
     on_message(prompt);
 
@@ -205,7 +212,7 @@ fun on_display_password(prompt_str, bullet_count)
     // Clear all bullets. (User might hit backspace)
     bullets = null;
     for (i = 0; i < bullet_count; i++)
-	{
+    {
         bullets[i].sprite = Sprite(bullet_image);
         bullets[i].sprite.SetX(start_pos + i * bullet_image.GetWidth());
         bullets[i].sprite.SetY(screen.h - 2 * bullet_image.GetHeight());
