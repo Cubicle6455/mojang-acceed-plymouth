@@ -44,23 +44,12 @@ FONT = "unifont"; // This cannot work.
 
 // --------------------------------- Init --------------------------
 
-if (Plymouth.GetMode() == "boot")
-{
-    // Bugjump red color.
-    Window.SetBackgroundTopColor(0.8705882352941177, 0.10588235294117647, 0.23921568627450981);
-    Window.SetBackgroundBottomColor(0.8705882352941177, 0.10588235294117647, 0.23921568627450981);
+Window.SetBackgroundTopColor(0.8705882352941177, 0.10588235294117647, 0.23921568627450981);
+Window.SetBackgroundBottomColor(0.8705882352941177, 0.10588235294117647, 0.23921568627450981);
 
-    for (i = 0; i < NUM; i++)
-    {
-        // 0.159 = 324 / 1343 * 0.663
-        logo.images[i] = Image("progress-" + i + ".png").Scale(screen.w * 0.663, screen.w * 0.159);
-    }
-}
-else
-{
-    NUM = 1;
-    logo.images[0] = Image("progress-80.png").Scale(screen.w * 0.663, screen.w * 0.159);
-}
+NUM = 1;
+
+logo.images[0] = Image("static_logo.png").Scale(screen.w * 0.663, screen.w * 0.159);
 
 // --------------------------------- Logo --------------------------
 logo.is_done = 0;
@@ -74,14 +63,8 @@ fun update_logo()
 {
     if (!logo.is_done)
     {
-        idx = Math.Int(logo.progress / SPEED);
-        if (idx >= NUM)
-        {
-            logo.is_done = 1;
-            return;
-        }
-        logo.sprite.SetImage(logo.images[idx]);
-        logo.progress++;
+        logo.sprite.SetImage(logo.images[0]);
+        logo.is_done = 1;
     }
 }
 
